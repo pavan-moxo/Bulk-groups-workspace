@@ -1,31 +1,51 @@
-# Moxo Group Binder Creator
+# Moxo Group Workspace Creator
 
-Create group binders (workspaces) for clients with internal team members in bulk using Moxo API.
+Create Moxo group workspaces from one grouped member CSV.
 
-## Features
+## What changed
 
-- 🔐 OAuth token generation
-- 👥 Bulk client upload (CSV)
-- 👨‍💼 Internal team management
-- 🏷️ Custom binder naming with variables (`{{name}}`, `{{email}}`)
-- 👑 Flexible binder owner assignment (internal or client)
-- 🏷️ Workspace tags support (JSON format)
-- ⚡ Fast bulk creation - one API call per client
-- 💾 Auto-save configuration
+The app now reads one CSV where every row is one member. Rows with the same `workspace_name` are grouped into one Moxo workspace.
 
-## How It Works
+This supports launch sheets like `Group_Members_Launch`.
 
-1. **Configure API** - Enter Moxo domain, Org ID, Client ID/Secret
-2. **Generate Token** - Get access token for authentication
-3. **Upload Clients** - CSV with email and name
-4. **Add Internal Team** - CSV with emails and optional BOARD_OWNER flag
-5. **Configure Binder Settings** - Name template, description, tags, owner
-6. **Create** - One click creates binders for all clients
+## Required CSV format
 
-## CSV Formats
-
-### Clients CSV (`clients_sample.csv`)
 ```csv
-email,name
-client1@example.com,John Client
-client2@example.com,Sarah Client
+workspace_name,building,batch,member_email,member_name,member_type,member_source,unit_keys,include,notes
+Sample Tower A,Sample Tower,A,client001@example.com,Sample Client 001,MEMBER,owner,ST101,yes,
+Sample Tower A,Sample Tower,A,pavan.prasad@moxo.com,Internal Owner 1,BOARD_OWNER,internal,,yes,
+Sample Tower A,Sample Tower,A,raman.singh@moxo.com,Internal Owner 2,MEMBER,internal,,yes,
+```
+
+Required columns:
+
+- `workspace_name`
+- `member_email`
+
+Recommended columns:
+
+- `member_name`
+- `member_type`
+- `member_source`
+- `building`
+- `batch`
+- `unit_keys`
+- `include`
+- `notes`
+
+Use `member_type=BOARD_OWNER` for exactly one member in each workspace.
+
+Rows with `include` set to `no`, `false`, `0`, or `skip` are ignored.
+
+## How it works
+
+1. Configure API credentials.
+2. Generate a token.
+3. Upload or paste the grouped member CSV.
+4. The app validates the rows.
+5. Click **Create Group Workspaces**.
+6. The app creates one binder per `workspace_name`, with all matching members.
+
+## Important
+
+All member emails must already exist in the Moxo organization before launch.

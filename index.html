@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moxo · Group Binder Creator</title>
+    <title>Moxo · Group Workspace Creator</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/png" href="./assetws/iconmoxo.png">
+    <link rel="icon" type="image/png" href="./assetws/iconmoxo.png">
 </head>
 <body>
     <div class="app">
         <div class="container">
-            <!-- Header -->
             <div class="header">
                 <div class="header-left">
                     <img src="./assetws/iconmoxo.png" alt="Moxo" class="logo-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%233B82F6%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2260%22 font-weight=%22bold%22%3EM%3C/text%3E%3C/svg%3E'">
                     <div class="logo-text">
-                        <h1>Group Binder Creator</h1>
-                        <p>Create client workspaces with internal teams in bulk</p>
+                        <h1>Group Workspace Creator</h1>
+                        <p>Create one workspace per group name from a single member CSV</p>
                     </div>
                 </div>
                 <div class="header-right">
@@ -32,7 +31,6 @@
                 </div>
             </div>
 
-            <!-- Config Panel -->
             <div class="config-panel" id="configPanel">
                 <div class="panel-header">
                     <h3><i class="fas fa-key"></i> API Configuration</h3>
@@ -72,92 +70,42 @@
                 </div>
             </div>
 
-            <!-- Work Area -->
-            <div class="work-area">
-                <!-- Clients Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-users"></i> Clients</h3>
-                        <div class="card-actions">
-                            <button class="btn-icon-small" onclick="downloadSampleCSV('clients')">
-                                <i class="fas fa-download"></i> Sample
-                            </button>
-                            <button class="btn-icon-small" onclick="uploadCSV('clients')">
-                                <i class="fas fa-upload"></i> Upload CSV
-                            </button>
-                            <input type="file" id="clientsCsv" accept=".csv" style="display:none" onchange="handleCSVUpload('clients', this)">
-                        </div>
-                    </div>
-                    <textarea id="clientsList" rows="6" placeholder="email,name&#10;client1@example.com,John Client&#10;client2@example.com,Sarah Client"></textarea>
-                    <div class="card-footer">
-                        <span class="count-badge" id="clientCount">0 clients</span>
-                        <button class="btn-text" onclick="clearClients()">Clear all</button>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-table"></i> Grouped Members CSV</h3>
+                    <div class="card-actions">
+                        <button class="btn-icon-small" onclick="downloadSampleCSV()">
+                            <i class="fas fa-download"></i> Sample
+                        </button>
+                        <button class="btn-icon-small" onclick="uploadCSV()">
+                            <i class="fas fa-upload"></i> Upload CSV
+                        </button>
+                        <input type="file" id="launchCsv" accept=".csv" style="display:none" onchange="handleCSVUpload(this)">
                     </div>
                 </div>
-
-                <!-- Internal Team Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-chalkboard-user"></i> Internal Team</h3>
-                        <div class="card-actions">
-                            <button class="btn-icon-small" onclick="downloadSampleCSV('team')">
-                                <i class="fas fa-download"></i> Sample
-                            </button>
-                            <button class="btn-icon-small" onclick="uploadCSV('team')">
-                                <i class="fas fa-upload"></i> Upload CSV
-                            </button>
-                            <input type="file" id="teamCsv" accept=".csv" style="display:none" onchange="handleCSVUpload('team', this)">
-                        </div>
-                    </div>
-                    <textarea id="teamList" rows="6" placeholder="email,member_type&#10;advisor1@company.com,BOARD_OWNER&#10;advisor2@company.com,&#10;advisor3@company.com,"></textarea>
-                    <div class="card-footer">
-                        <span class="count-badge" id="teamCount">0 members</span>
-                        <button class="btn-text" onclick="clearTeam()">Clear all</button>
-                    </div>
+                <textarea id="launchRowsList" rows="14" placeholder="workspace_name,building,batch,member_email,member_name,member_type,member_source,unit_keys,include,notes&#10;Sample Tower A,Sample Tower,A,client001@example.com,Sample Client 001,MEMBER,owner,ST101,yes,&#10;Sample Tower A,Sample Tower,A,pavan.prasad@moxo.com,Internal Owner 1,BOARD_OWNER,internal,,yes,"></textarea>
+                <div class="card-footer">
+                    <span class="count-badge" id="workspaceCount">0 workspaces</span>
+                    <span class="count-badge" id="memberCount">0 members</span>
+                    <span class="count-badge" id="validationStatus">No data</span>
+                    <button class="btn-text" onclick="clearLaunchRows()">Clear all</button>
                 </div>
             </div>
 
-            <!-- Binder Settings -->
             <div class="card">
                 <div class="card-header">
-                    <h3><i class="fas fa-cog"></i> Binder Settings</h3>
+                    <h3><i class="fas fa-cog"></i> Workspace Settings</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col">
-                            <label class="form-label">Binder Name Template <span class="required-field">*</span></label>
-                            <input type="text" class="form-control" id="binderNameTemplate" value="{{name}} Workspace">
-                            <small class="text-muted">Use <code>{{name}}</code> and <code>{{email}}</code> as variables. Preview: <span id="namePreviewText">-</span></small>
-                        </div>
-                        <div class="col">
                             <label class="form-label">Description (Optional)</label>
-                            <input type="text" class="form-control" id="binderDescription" placeholder="Team collaboration workspace">
+                            <input type="text" class="form-control" id="binderDescription" placeholder="Group workspace">
                         </div>
-                    </div>
-                    <div class="row mt-3">
                         <div class="col">
-                            <label class="form-label">Reference ID (Optional)</label>
-                            <input type="text" class="form-control" id="referenceId" placeholder="unique_ref_{{email}}">
-                            <small class="text-muted">Use <code>{{name}}</code> or <code>{{email}}</code></small>
-                        </div>
-                        <!-- <div class="col">
-                            <label class="form-label">Workspace Tags (Optional)</label>
-                            <textarea class="form-control" id="workspaceTags" rows="2" placeholder='{"ARR": "HIGH", "Category": "Premium"}' style="font-family: monospace;"></textarea>
-                            <small class="text-muted">JSON format: {"tag_name": "tag_value"}</small>
-                        </div> -->
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col">
-                            <label class="form-label">Binder Owner</label>
-                            <select class="form-select" id="ownerType">
-                                <option value="internal">Internal User (BOARD_OWNER)</option>
-                                <option value="client">Client as Owner (is_channel_subscription=true)</option>
-                            </select>
-                        </div>
-                        <div class="col" id="ownerEmailCol">
-                            <label class="form-label">Owner Email (Optional)</label>
-                            <input type="email" class="form-control" id="ownerEmail" placeholder="owner@company.com">
-                            <small class="text-muted">Leave empty to use first BOARD_OWNER from team</small>
+                            <label class="form-label">Reference ID Template (Optional)</label>
+                            <input type="text" class="form-control" id="referenceIdTemplate" placeholder="{{workspace_name}}">
+                            <small class="text-muted">Use <code>{{workspace_name}}</code>, <code>{{building}}</code>, or <code>{{batch}}</code>.</small>
                         </div>
                     </div>
                     <div class="row mt-3">
@@ -177,28 +125,17 @@
                 </div>
             </div>
 
-            <div class="row mt-3">
-    <div class="col">
-        <label class="form-label">BOARD_OWNER Email <span class="required-field">*</span></label>
-        <input type="email" class="form-control" id="boardOwnerEmail" placeholder="owner@company.com">
-        <small class="text-muted">This user will be the binder owner. Must be one of the internal team members.</small>
-    </div>
-</div>
-
-            <!-- Info Note -->
             <div class="info-note">
                 <i class="fas fa-info-circle"></i>
-                Each client will get a separate binder with ALL internal team members. Total binders = number of clients.
+                Rows with the same workspace_name are created as one workspace. Exactly one row per workspace should have member_type BOARD_OWNER.
             </div>
 
-            <!-- Launch Section -->
             <div class="launch-section">
                 <div class="launch-header">
-                    <h3><i class="fas fa-rocket"></i> Launch Bulk Creation</h3>
+                    <h3><i class="fas fa-rocket"></i> Launch Group Workspaces</h3>
                     <div class="status-badge" id="statusBadge">Ready</div>
                 </div>
 
-                <!-- Progress -->
                 <div class="progress-section" id="progressSection" style="display:none">
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
@@ -212,17 +149,16 @@
 
                 <div class="action-buttons">
                     <button class="btn-primary" id="createBtn" onclick="createGroupBinders()">
-                        <i class="fas fa-play"></i> Create Group Binders
+                        <i class="fas fa-play"></i> Create Group Workspaces
                     </button>
                     <button class="btn-secondary" onclick="clearLogs()">
                         <i class="fas fa-trash"></i> Clear Logs
                     </button>
                 </div>
 
-                <!-- Logs -->
                 <div class="log-container" id="logContainer">
                     <div class="log-entry info">
-                        <i class="fas fa-check-circle"></i> Ready. Configure API and generate token first.
+                        <i class="fas fa-check-circle"></i> Ready. Upload one grouped member CSV and generate a token first.
                     </div>
                 </div>
             </div>
