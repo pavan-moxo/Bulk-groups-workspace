@@ -328,6 +328,36 @@ function buildUsers(group) {
     }).filter(Boolean);
 }
 
+function summarizePayload(payload) {
+    return JSON.stringify({
+        name: payload.name,
+        users: payload.users?.map((entry) => ({
+            email: entry.user?.email,
+            member_type: entry.user?.member_type || "MEMBER",
+        })),
+        reference_id: payload.reference_id,
+        restricted: payload.restricted,
+        suppress_feed: payload.suppress_feed,
+    });
+}
+
+async function parseApiResponse(response) {
+    const text = await response.text();
+    if (!text) return {};
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        return { raw: text };
+    }
+}
+
+function formatApiError(response, data, payload) {
+    const detail = data?.message || data?.error || data?.code || data?.raw || "API error";
+    const extra = data?.data ? ` | data: ${JSON.stringify(data.data)}` : "";
+    return `HTTP ${response.status}: ${detail}${extra} | payload: ${summarizePayload(payload)}`;
+}
+
 async function createGroupedBinder(group, settings) {
     if (!accessToken) return { success: false, error: "No token" };
 
@@ -351,12 +381,12 @@ async function createGroupedBinder(group, settings) {
             },
             body: JSON.stringify(payload),
         });
-        const data = await response.json();
+        const data = await parseApiResponse(response);
 
-        if (data.code === "RESPONSE_SUCCESS") {
+        if (response.ok && data.code === "RESPONSE_SUCCESS") {
             return { success: true, binderId: data.data?.id, name: group.name };
         }
-        return { success: false, error: data.message || data.code || "API error" };
+        return { success: false, error: formatApiError(response, data, payload) };
     } catch (error) {
         return { success: false, error: error.message };
     }
