@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moxo · Group Workspace Creator</title>
+    <title>Moxo · Workspace Launcher</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
@@ -16,8 +16,8 @@
                 <div class="header-left">
                     <img src="./assetws/iconmoxo.png" alt="Moxo" class="logo-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%233B82F6%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2260%22 font-weight=%22bold%22%3EM%3C/text%3E%3C/svg%3E'">
                     <div class="logo-text">
-                        <h1>Group Workspace Creator</h1>
-                        <p>Create one workspace per group name from a single member CSV</p>
+                        <h1>Moxo Workspace Launcher</h1>
+                        <p>Invite RM clients first, then create group workspaces</p>
                     </div>
                 </div>
                 <div class="header-right">
@@ -72,7 +72,34 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h3><i class="fas fa-table"></i> Grouped Members CSV</h3>
+                    <h3><i class="fas fa-user-plus"></i> Step 1 · RM Client Invite CSV</h3>
+                    <div class="card-actions">
+                        <button class="btn-icon-small" onclick="downloadInviteSampleCSV()">
+                            <i class="fas fa-download"></i> Sample
+                        </button>
+                        <button class="btn-icon-small" onclick="uploadInviteCSV()">
+                            <i class="fas fa-upload"></i> Upload CSV
+                        </button>
+                        <input type="file" id="inviteCsv" accept=".csv" style="display:none" onchange="handleInviteCSVUpload(this)">
+                    </div>
+                </div>
+                <textarea id="inviteRowsList" rows="8" placeholder="advisor_email,client_email,first_name,last_name,unique_id,phone_number,greet_message,include&#10;pavan.prasad@moxo.com,sample.client001@yopmail.com,Sample,Client 001,,,Welcome to join,yes&#10;pavan.prasad@moxo.com,sample.client002@yopmail.com,Sample,Client 002,,,Welcome to join,yes"></textarea>
+                <div class="card-footer">
+                    <span class="count-badge" id="inviteCount">0 invite rows</span>
+                    <span class="count-badge" id="advisorCount">0 advisors</span>
+                    <span class="count-badge" id="inviteValidationStatus">No data</span>
+                    <button class="btn-text" onclick="clearInviteRows()">Clear all</button>
+                </div>
+            </div>
+
+            <div class="info-note">
+                <i class="fas fa-info-circle"></i>
+                Step 1 invites or establishes each client relationship under the advisor_email. Use this before creating group workspaces for fresh clients.
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-users"></i> Step 2 · Grouped Members CSV</h3>
                     <div class="card-actions">
                         <button class="btn-icon-small" onclick="downloadSampleCSV()">
                             <i class="fas fa-download"></i> Sample
@@ -83,7 +110,7 @@
                         <input type="file" id="launchCsv" accept=".csv" style="display:none" onchange="handleCSVUpload(this)">
                     </div>
                 </div>
-                <textarea id="launchRowsList" rows="14" placeholder="workspace_name,building,batch,member_email,member_name,member_type,member_source,unit_keys,include,notes&#10;Sample Tower A,Sample Tower,A,client001@example.com,Sample Client 001,MEMBER,owner,ST101,yes,&#10;Sample Tower A,Sample Tower,A,pavan.prasad@moxo.com,Internal Owner 1,BOARD_OWNER,internal,,yes,"></textarea>
+                <textarea id="launchRowsList" rows="14" placeholder="workspace_name,member_email,member_name,member_type,include&#10;Sample Group 01,sample.client001@yopmail.com,Sample Client 001,MEMBER,yes&#10;Sample Group 01,pavan.prasad@moxo.com,Internal Owner 1,BOARD_OWNER,yes"></textarea>
                 <div class="card-footer">
                     <span class="count-badge" id="workspaceCount">0 workspaces</span>
                     <span class="count-badge" id="memberCount">0 members</span>
@@ -127,12 +154,12 @@
 
             <div class="info-note">
                 <i class="fas fa-info-circle"></i>
-                Rows with the same workspace_name are created as one workspace. Exactly one row per workspace should have member_type BOARD_OWNER.
+                Step 2 creates one group workspace per workspace_name. Rows with the same workspace_name are bundled into the same workspace.
             </div>
 
             <div class="launch-section">
                 <div class="launch-header">
-                    <h3><i class="fas fa-rocket"></i> Launch Group Workspaces</h3>
+                    <h3><i class="fas fa-rocket"></i> Launch</h3>
                     <div class="status-badge" id="statusBadge">Ready</div>
                 </div>
 
@@ -148,6 +175,9 @@
                 </div>
 
                 <div class="action-buttons">
+                    <button class="btn-primary" id="inviteBtn" onclick="inviteRelationshipClients()">
+                        <i class="fas fa-user-plus"></i> Invite RM Clients
+                    </button>
                     <button class="btn-primary" id="createBtn" onclick="createGroupBinders()">
                         <i class="fas fa-play"></i> Create Group Workspaces
                     </button>
@@ -158,7 +188,7 @@
 
                 <div class="log-container" id="logContainer">
                     <div class="log-entry info">
-                        <i class="fas fa-check-circle"></i> Ready. Upload one grouped member CSV and generate a token first.
+                        <i class="fas fa-check-circle"></i> Ready. Upload invite CSV and group CSV, then generate a token.
                     </div>
                 </div>
             </div>

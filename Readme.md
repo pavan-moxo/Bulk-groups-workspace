@@ -1,20 +1,46 @@
-# Moxo Group Workspace Creator
+# Moxo Workspace Launcher
 
-Create Moxo group workspaces from one grouped member CSV.
+Launch Moxo workspaces in two steps:
 
-## What changed
+1. Invite or establish RM-to-client relationships from an invite CSV.
+2. Create group workspaces from a grouped member CSV.
 
-The app now reads one CSV where every row is one member. Rows with the same `workspace_name` are grouped into one Moxo workspace.
+## Step 1: RM client invite CSV
 
-This supports launch sheets like `Group_Members_Launch`.
-
-## Required CSV format
+Use this first for fresh clients. The app calls `POST /v1/me/relationship/invite` using the advisor in `advisor_email`.
 
 ```csv
-workspace_name,building,batch,member_email,member_name,member_type,member_source,unit_keys,include,notes
-Sample Tower A,Sample Tower,A,client001@example.com,Sample Client 001,MEMBER,owner,ST101,yes,
-Sample Tower A,Sample Tower,A,pavan.prasad@moxo.com,Internal Owner 1,BOARD_OWNER,internal,,yes,
-Sample Tower A,Sample Tower,A,raman.singh@moxo.com,Internal Owner 2,MEMBER,internal,,yes,
+advisor_email,client_email,first_name,last_name,unique_id,phone_number,greet_message,include
+pavan.prasad@moxo.com,sample.client001@yopmail.com,Sample,Client 001,,,Welcome to join,yes
+pavan.prasad@moxo.com,sample.client002@yopmail.com,Sample,Client 002,,,Welcome to join,yes
+```
+
+Required columns:
+
+- `advisor_email`
+- `first_name`
+- one of `client_email`, `unique_id`, or `phone_number`
+
+Recommended columns:
+
+- `last_name`
+- `greet_message`
+- `include`
+
+Rows with `include` set to `no`, `false`, `0`, or `skip` are ignored.
+
+## Step 2: Group workspace CSV
+
+The app reads one CSV where every row is one member. Rows with the same `workspace_name` are grouped into one Moxo workspace.
+
+Use this after the clients are valid in the Moxo org/context.
+
+```csv
+workspace_name,member_email,member_name,member_type,include
+Sample Group 01,sample.client001@yopmail.com,Sample Client 001,MEMBER,yes
+Sample Group 01,sample.client002@yopmail.com,Sample Client 002,MEMBER,yes
+Sample Group 01,pavan.prasad@moxo.com,Internal Owner 1,BOARD_OWNER,yes
+Sample Group 01,raman.singh@moxo.com,Internal Owner 2,MEMBER,yes
 ```
 
 Required columns:
@@ -41,11 +67,12 @@ Rows with `include` set to `no`, `false`, `0`, or `skip` are ignored.
 
 1. Configure API credentials.
 2. Generate a token.
-3. Upload or paste the grouped member CSV.
-4. The app validates the rows.
-5. Click **Create Group Workspaces**.
-6. The app creates one binder per `workspace_name`, with all matching members.
+3. Upload or paste the RM client invite CSV.
+4. Click **Invite RM Clients**.
+5. Upload or paste the grouped member CSV.
+6. Click **Create Group Workspaces**.
+7. The app creates one binder per `workspace_name`, with all matching members.
 
 ## Important
 
-All member emails must already exist in the Moxo organization before launch.
+For group workspace creation, all member emails must already exist or qualify in the Moxo organization context. For fresh clients, run the RM client invite step first.
